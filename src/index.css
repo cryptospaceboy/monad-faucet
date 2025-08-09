@@ -1,0 +1,94 @@
+/* index.css */
+
+/* Reset and base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background: linear-gradient(135deg, #2a003f, #1e0030);
+  color: #fff;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Main container */
+#root {
+  width: 100%;
+  max-width: 500px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2rem;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+  animation: fadeIn 0.8s ease-in-out forwards;
+}
+
+/* Headings */
+h1 {
+  color: #b19cd9;
+  margin-bottom: 1rem;
+}
+
+/* Buttons */
+button {
+  background: #4fc3f7;
+  color: #1e0030;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.25s ease-in-out;
+}
+
+button:hover {
+  background: #81d4fa;
+  transform: translateY(-2px);
+  box-shadow: 0 0 15px #4fc3f7, 0 0 25px #81d4fa;
+}
+
+button:disabled {
+  background: #555;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Status text */
+p {
+  margin-top: 1rem;
+  line-height: 1.4;
+}
+
+/* Footer with Twitter link */
+.footer {
+  margin-top: 2rem;
+  font-size: 0.9rem;
+  color: #b19cd9;
+}
+
+.footer a {
+  color: #4fc3f7;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
