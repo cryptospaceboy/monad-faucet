@@ -8,11 +8,14 @@ function App() {
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // ✅ v6 connectWallet
   const connectWallet = async () => {
     if (window.ethereum) {
       try {
-        const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        setWallet(account);
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        const signer = await provider.getSigner();
+        setWallet(await signer.getAddress());
       } catch (err) {
         console.error(err);
       }
@@ -21,9 +24,10 @@ function App() {
     }
   };
 
+  // ✅ v6 checkCooldown
   const checkCooldown = async () => {
     if (!wallet) return;
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const provider = new ethers.BrowserProvider(window.ethereum);
     const contract = new ethers.Contract(FAUCET_CONTRACT_ADDRESS, FAUCET_ABI, provider);
     const nextTime = await contract.nextClaimTime(wallet);
     const now = Math.floor(Date.now() / 1000);
@@ -31,6 +35,7 @@ function App() {
     setCooldown(diff > 0 ? diff : 0);
   };
 
+  // ✅ v6 claimFaucet
   const claimFaucet = async () => {
     if (!wallet) {
       setStatus('❌ Please connect your wallet first.');
@@ -39,8 +44,8 @@ function App() {
 
     setLoading(true);
     try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
       const contract = new ethers.Contract(FAUCET_CONTRACT_ADDRESS, FAUCET_ABI, signer);
 
       const tx = await contract.claim();
@@ -61,52 +66,50 @@ function App() {
   }, [wallet]);
 
   return (
-  <div className="app-container">
-    <h1>💧 Monad Testnet Faucet</h1>
-    <p>Connected Wallet: {wallet || 'Not connected'}</p>
+    <div className="app-container">
+      <h1>💧 Monad Testnet Faucet</h1>
+      <p>Connected Wallet: {wallet || 'Not connected'}</p>
 
-    {!wallet && (
-      <button onClick={connectWallet}>Connect Wallet</button>
-    )}
+      {!wallet && (
+        <button onClick={connectWallet}>Connect Wallet</button>
+      )}
 
-    {wallet && cooldown > 0 && (
-      <p>⏳ You can claim again in {Math.ceil(cooldown / 3600)} hours.</p>
-    )}
+      {wallet && cooldown > 0 && (
+        <p>⏳ You can claim again in {Math.ceil(cooldown / 3600)} hours.</p>
+      )}
 
-    {wallet && cooldown === 0 && (
-      <button onClick={claimFaucet} disabled={loading}>
-        {loading ? 'Claiming...' : 'Claim 0.02 MON'}
-      </button>
-    )}
+      {wallet && cooldown === 0 && (
+        <button onClick={claimFaucet} disabled={loading}>
+          {loading ? 'Claiming...' : 'Claim 0.02 MON'}
+        </button>
+      )}
 
-    {status && <p className="status">{status}</p>}
+      {status && <p className="status">{status}</p>}
 
-    {/* Twitter link */}
-    <a
-      href="https://twitter.com/dattips_boy"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="twitter-link"
-    >
-      Created by @dattips_boy
-    </a>
+      <a
+        href="https://twitter.com/dattips_boy"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="twitter-link"
+      >
+        Created by @dattips_boy
+      </a>
 
-    {/* Footer */}
-    <div
-      style={{
-        marginTop: '30px',
-        padding: '15px',
-        background: 'linear-gradient(90deg, #6a0dad, #00c6ff)',
-        color: 'white',
-        borderRadius: '8px',
-        fontSize: '14px',
-        textAlign: 'center',
-      }}
-    >
-      💡 Built for the Monad Testnet — Have fun testing and happy claiming!
+      <div
+        style={{
+          marginTop: '30px',
+          padding: '15px',
+          background: 'linear-gradient(90deg, #6a0dad, #00c6ff)',
+          color: 'white',
+          borderRadius: '8px',
+          fontSize: '14px',
+          textAlign: 'center',
+        }}
+      >
+        💡 Built for the Monad Testnet — Have fun testing and happy claiming!
+      </div>
     </div>
-  </div>
-);
+  );
 }
 
 export default App;
