@@ -106,8 +106,39 @@ function App() {
           textAlign: 'center',
         }}
       >
-        💡 Built for the Monad Testnet — Have fun testing and happy claiming!
+       💡 Built for the Monad Testnet — Have fun testing and happy claiming!
       </div>
+
+      {/* A-Ads Banner */}
+      <div 
+        id="frame" 
+        style={{ 
+          width: "100%", 
+          margin: "20px auto 0 auto", 
+          background: "rgba(0, 0, 0, 0.35)", // lighter transparency
+          position: "relative", 
+          zIndex: 99998, 
+          textAlign: "center", 
+          padding: "10px 0", 
+          borderRadius: "8px" // smooth rounded corners
+        }}
+      >
+        <iframe
+          data-aa="2406854"
+          src="//acceptable.a-ads.com/2406854/?size=Adaptive"
+          style={{ 
+            border: 0, 
+            padding: 0, 
+            width: "70%", 
+            height: "auto", 
+            overflow: "hidden", 
+            display: "block", 
+            margin: "auto" 
+          }}
+          title="A-Ads"
+        ></iframe>
+      </div>
+
     </div>
   );
 }
