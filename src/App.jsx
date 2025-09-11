@@ -8,10 +8,13 @@ function App() {
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // ---------- NEW: Discord user state ----------
+  // ---------- Discord user state ----------
   const [discordUser, setDiscordUser] = useState(null);
 
-  // ✅ v6 connectWallet
+  // Backend live URL
+  const BACKEND_URL = "https://monad-faucet-backend.vercel.app";
+
+  // ✅ Connect Wallet
   const connectWallet = async () => {
     if (window.ethereum) {
       try {
@@ -27,7 +30,7 @@ function App() {
     }
   };
 
-  // ✅ v6 checkCooldown
+  // ✅ Check Cooldown
   const checkCooldown = async () => {
     if (!wallet) return;
     const provider = new ethers.BrowserProvider(window.ethereum);
@@ -38,7 +41,7 @@ function App() {
     setCooldown(diff > 0 ? diff : 0);
   };
 
-  // ✅ v6 claimFaucet
+  // ✅ Claim Faucet
   const claimFaucet = async () => {
     if (!wallet) {
       setStatus('❌ Please connect your wallet first.');
@@ -62,10 +65,10 @@ function App() {
     checkCooldown();
   };
 
-  // ---------- NEW: Check if user is logged in via Discord ----------
+  // ---------- Check if user is logged in via Discord ----------
   const checkDiscordLogin = async () => {
     try {
-      const res = await fetch('https://monad-faucet-backend.vercel.app/me', {
+      const res = await fetch(`${BACKEND_URL}/me`, {
         credentials: 'include',
       });
       const data = await res.json();
@@ -73,6 +76,7 @@ function App() {
         setDiscordUser(data.user);
         return true;
       } else {
+        setDiscordUser(null);
         return false;
       }
     } catch (err) {
@@ -81,12 +85,12 @@ function App() {
     }
   };
 
-  // ---------- NEW: Redirect to Discord login ----------
+  // ---------- Redirect to Discord login ----------
   const loginWithDiscord = () => {
-    window.location.href = 'https://monad-faucet-backend.vercel.app/auth/discord';
-  };
+  window.location.href = $`{BACKEND_URL}/auth/discord`;
+};
 
-  // ---------- NEW: Wrap claim with Discord login check ----------
+  // ---------- Wrap claim with Discord login check ----------
   const handleClaim = async () => {
     const loggedIn = await checkDiscordLogin();
     if (!loggedIn) {
@@ -96,6 +100,12 @@ function App() {
     claimFaucet();
   };
 
+  // Check Discord login once when component mounts
+  useEffect(() => {
+    checkDiscordLogin();
+  }, []);
+
+  // Check cooldown whenever wallet changes
   useEffect(() => {
     if (wallet) {
       checkCooldown();
@@ -116,7 +126,6 @@ function App() {
       )}
 
       {wallet && cooldown === 0 && (
-        // ---------- UPDATED: use handleClaim instead of claimFaucet ----------
         <button onClick={handleClaim} disabled={loading}>
           {loading ? 'Claiming...' : 'Claim 0.05 MON'}
         </button>
@@ -124,7 +133,6 @@ function App() {
 
       {status && <p className="status">{status}</p>}
 
-      {/* ---------- NEW: Show Discord username if logged in ---------- */}
       {discordUser && (
         <p>Logged in as {discordUser.username}#{discordUser.discriminator}</p>
       )}
@@ -132,9 +140,8 @@ function App() {
       <a
         href="https://twitter.com/dattips_boy"
         target="_blank"
-        rel="noopener noreferrer"
-        className="twitter-link"
-      >Created by @dattips_boy
+        rel="noopener noreferrer"className="twitter-link"
+      > Created by @dattips_boy
       </a>
 
       <div
