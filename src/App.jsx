@@ -8,6 +8,9 @@ function App() {
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // ---------- NEW: Discord user state ----------
+  const [discordUser, setDiscordUser] = useState(null);
+
   // ✅ v6 connectWallet
   const connectWallet = async () => {
     if (window.ethereum) {
@@ -50,13 +53,47 @@ function App() {
 
       const tx = await contract.claim();
       await tx.wait();
-      setStatus('✅ Claim successful! 0.02 MON sent to your wallet.');
+      setStatus('✅ Claim successful! 0.05 MON sent to your wallet.');
     } catch (err) {
       console.error(err);
       setStatus('❌ Claim failed: ' + (err.reason || err.message));
     }
     setLoading(false);
     checkCooldown();
+  };
+
+  // ---------- NEW: Check if user is logged in via Discord ----------
+  const checkDiscordLogin = async () => {
+    try {
+      const res = await fetch('https://monad-faucet-backend.vercel.app/me', {
+        credentials: 'include',
+      });
+      const data = await res.json();
+      if (data.loggedIn) {
+        setDiscordUser(data.user);
+        return true;
+      } else {
+        return false;
+      }
+    } catch (err) {
+      console.error('Discord check error:', err);
+      return false;
+    }
+  };
+
+  // ---------- NEW: Redirect to Discord login ----------
+  const loginWithDiscord = () => {
+    window.location.href = 'https://monad-faucet-backend.vercel.app/auth/discord';
+  };
+
+  // ---------- NEW: Wrap claim with Discord login check ----------
+  const handleClaim = async () => {
+    const loggedIn = await checkDiscordLogin();
+    if (!loggedIn) {
+      loginWithDiscord();
+      return;
+    }
+    claimFaucet();
   };
 
   useEffect(() => {
@@ -79,20 +116,25 @@ function App() {
       )}
 
       {wallet && cooldown === 0 && (
-        <button onClick={claimFaucet} disabled={loading}>
-          {loading ? 'Claiming...' : 'Claim 0.02 MON'}
+        // ---------- UPDATED: use handleClaim instead of claimFaucet ----------
+        <button onClick={handleClaim} disabled={loading}>
+          {loading ? 'Claiming...' : 'Claim 0.05 MON'}
         </button>
       )}
 
       {status && <p className="status">{status}</p>}
+
+      {/* ---------- NEW: Show Discord username if logged in ---------- */}
+      {discordUser && (
+        <p>Logged in as {discordUser.username}#{discordUser.discriminator}</p>
+      )}
 
       <a
         href="https://twitter.com/dattips_boy"
         target="_blank"
         rel="noopener noreferrer"
         className="twitter-link"
-      >
-        Created by @dattips_boy
+      >Created by @dattips_boy
       </a>
 
       <div
@@ -115,12 +157,12 @@ function App() {
         style={{ 
           width: "100%", 
           margin: "20px auto 0 auto", 
-          background: "rgba(0, 0, 0, 0.35)", // lighter transparency
+          background: "rgba(0, 0, 0, 0.35)",
           position: "relative", 
           zIndex: 99998, 
           textAlign: "center", 
           padding: "10px 0", 
-          borderRadius: "8px" // smooth rounded corners
+          borderRadius: "8px"
         }}
       >
         <iframe
