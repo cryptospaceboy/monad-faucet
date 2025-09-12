@@ -135,8 +135,20 @@ function App() {
 
       {status && <p style={{ textAlign: "center", color: status.startsWith("✅") ? "green" : "red" }}>{status}</p>}
 
+      {/* Twitter link restored */}<div style={{ textAlign: "center", marginTop: "15px" }}>
+        <a
+          href="https://twitter.com/dattips_boy"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: "#1DA1F2", textDecoration: "none", fontWeight: "bold" }}
+        >
+          Follow @dattips_boy
+        </a>
+      </div>
+
       <div
-        style={{marginTop: "20px",
+        style={{
+          marginTop: "20px",
           padding: "15px",
           background: "linear-gradient(90deg, #6a0dad, #00c6ff)",
           color: "white",
