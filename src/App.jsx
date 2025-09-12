@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { FAUCET_CONTRACT_ADDRESS, FAUCET_ABI } from './config/config.js'; // ✅ fixed import path
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
 function App() {
   const [address, setAddress] = useState('');
   const [cooldown, setCooldown] = useState(0);
@@ -8,10 +10,10 @@ function App() {
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // ✅ Check cooldown from backend via proxy
+  // ✅ Check cooldown from backend
   const checkCooldown = async (addr) => {
     try {
-      const res = await fetch(`/api/cooldown`, {
+      const res = await fetch(`${BACKEND_URL}/cooldown`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ address: addr }),
@@ -28,7 +30,7 @@ function App() {
     }
   };
 
-  // ✅ Claim via backend via proxy
+  // ✅ Claim via backend
   const claimFaucet = async () => {
     if (!address) {
       setStatus('❌ Please enter a wallet address.');
@@ -37,7 +39,7 @@ function App() {
 
     setLoading(true);
     try {
-      const res = await fetch(`/api/claim`, {
+      const res = await fetch(`${BACKEND_URL}/claim`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ address }),
@@ -51,10 +53,8 @@ function App() {
         setStatus(`❌ Claim failed: ${data.error}`);
       }
     } catch (err) {
-      console.error("Claim failed:", err);
-      let msg = "Claim failed: Unknown error";
-      if (err && err.message) msg = "Claim failed: " + err.message;
-      setStatus(msg);
+      console.error(err);
+      setStatus('❌ Claim failed: ' + (err.message || 'Unknown error'));
     }
     setLoading(false);
   };
@@ -66,7 +66,7 @@ function App() {
         setCooldown((prev) => {
           if (prev <= 1) {
             clearInterval(interval);
-            checkCooldown(address); // auto-refresh
+            checkCooldown(address);
             return 0;
           }
           return prev - 1;
