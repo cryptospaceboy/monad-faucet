@@ -1,5 +1,5 @@
- export const FAUCET_ABI = [
-    {
+export const FAUCET_ABI = [
+     {
       "inputs": [],
       "stateMutability": "nonpayable",
       "type": "constructor"
@@ -10,7 +10,7 @@
         {
           "indexed": true,
           "internalType": "address",
-          "name": "user",
+          "name": "to",
           "type": "address"
         },
         {
@@ -43,7 +43,13 @@
       "type": "event"
     },
     {
-      "inputs": [],
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_to",
+          "type": "address"
+        }
+      ],
       "name": "claim",
       "outputs": [],
       "stateMutability": "nonpayable",
@@ -118,6 +124,19 @@
         }
       ],
       "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address payable",
+          "name": "_to",
+          "type": "address"
+        }
+      ],
+      "name": "withdrawAll",
+      "outputs": [],
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {

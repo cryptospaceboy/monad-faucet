@@ -1,9 +1,9 @@
 // Faucet Contract
-export const FAUCET_CONTRACT_ADDRESS = '0x6CDeBB4b5e4Fe5A89011A1bdD07849A1208bafCF';
+export const FAUCET_CONTRACT_ADDRESS = '0x18a214aE59408f673a9876B804E10D273b1f9292';
 
 // Paste your faucet ABI here
 export const FAUCET_ABI = [
-    {
+     {
       "inputs": [],
       "stateMutability": "nonpayable",
       "type": "constructor"
@@ -14,7 +14,7 @@ export const FAUCET_ABI = [
         {
           "indexed": true,
           "internalType": "address",
-          "name": "user",
+          "name": "to",
           "type": "address"
         },
         {
@@ -47,7 +47,13 @@ export const FAUCET_ABI = [
       "type": "event"
     },
     {
-      "inputs": [],
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_to",
+          "type": "address"
+        }
+      ],
       "name": "claim",
       "outputs": [],
       "stateMutability": "nonpayable",
@@ -125,13 +131,26 @@ export const FAUCET_ABI = [
       "type": "function"
     },
     {
+      "inputs": [
+        {
+          "internalType": "address payable",
+          "name": "_to",
+          "type": "address"
+        }
+      ],
+      "name": "withdrawAll",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
       "stateMutability": "payable",
       "type": "receive"
     }
 ];
 
 // Faucet settings
-export const CLAIM_AMOUNT = '0.02'; // MON to claim
+export const CLAIM_AMOUNT = '0.05'; // MON to claim
 export const CLAIM_INTERVAL_HOURS = 9; // Claim cooldown in hours
 
 // Creator info (for clickable link in UI footer)
