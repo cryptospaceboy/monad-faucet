@@ -5,13 +5,11 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
-    // Proxy API requests to backend
-    proxy: {
-      '/api': {
-        target: 'https://monad-faucet-backend.vercel.app',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '')
-      }
-    }
-  }
+    // No proxy needed for live deployment
+    host: true,      // Allows accessing on local network (optional)
+    port: 5173,
+  },
+  build: {
+    outDir: 'dist',
+  },
 })

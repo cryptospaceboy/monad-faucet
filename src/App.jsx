@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FAUCET_CONTRACT_ADDRESS, FAUCET_ABI } from './config/config.js'; // ✅ fixed import path
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+import { FAUCET_CONTRACT_ADDRESS, FAUCET_ABI } from './config/config.js';
 
 function App() {
   const [address, setAddress] = useState('');
@@ -10,8 +8,12 @@ function App() {
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // ✅ Check cooldown from backend
+  // Backend URL from .env
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
+  // Check cooldown from backend
   const checkCooldown = async (addr) => {
+    if (!addr) return;
     try {
       const res = await fetch(`${BACKEND_URL}/cooldown`, {
         method: "POST",
@@ -26,11 +28,11 @@ function App() {
       }
     } catch (err) {
       console.error("Cooldown check failed:", err);
-      setStatus('❌ Failed to fetch cooldown');
+      setStatus("❌ Failed to check cooldown");
     }
   };
 
-  // ✅ Claim via backend
+  // Claim faucet
   const claimFaucet = async () => {
     if (!address) {
       setStatus('❌ Please enter a wallet address.');
@@ -48,18 +50,18 @@ function App() {
       const data = await res.json();
       if (data.success) {
         setStatus(`✅ Claim successful! Tx: ${data.txHash}`);
-        checkCooldown(address); // refresh cooldown
+        checkCooldown(address);
       } else {
         setStatus(`❌ Claim failed: ${data.error}`);
       }
     } catch (err) {
       console.error(err);
-      setStatus('❌ Claim failed: ' + (err.message || 'Unknown error'));
+      setStatus('❌ Claim failed: Unknown error');
     }
     setLoading(false);
   };
 
-  // ⏳ live countdown effect
+  // Countdown effect
   useEffect(() => {
     if (cooldown > 0) {
       const interval = setInterval(() => {
@@ -76,7 +78,7 @@ function App() {
     }
   }, [cooldown, address]);
 
-  // format seconds -> HH:MM:SS
+  // Format seconds -> HH:MM:SS
   useEffect(() => {
     if (cooldown > 0) {
       const hours = Math.floor(cooldown / 3600);
@@ -93,84 +95,57 @@ function App() {
   }, [cooldown]);
 
   return (
-    <div className="app-container">
-      <h1>💧 Monad Testnet Faucet</h1>
+    <div className="app-container" style={{ maxWidth: "500px", margin: "auto", padding: "20px" }}>
+      <h1 style={{ textAlign: "center" }}>💧 Monad Testnet Faucet</h1>
 
-      <div style={{ marginBottom: "20px" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "20px" }}>
         <input
           type="text"
           value={address}
           onChange={(e) => setAddress(e.target.value)}
           placeholder="Enter your wallet address"
           style={{
-            width: "70%",
-            padding: "10px",
+            padding: "12px",
             borderRadius: "8px",
             border: "1px solid #ccc",
             fontSize: "16px",
-            marginRight: "10px",
+            width: "100%",
           }}
         />
         {cooldown === 0 ? (
-          <button onClick={claimFaucet} disabled={loading}>
-            {loading ? 'Claiming...' : 'Claim 0.05 MON'}
+          <button
+            onClick={claimFaucet}
+            disabled={loading}
+            style={{
+              padding: "12px",
+              borderRadius: "8px",
+              background: "#6a0dad",
+              color: "white",
+              fontSize: "16px",
+              cursor: loading ? "not-allowed" : "pointer",
+              width: "100%",
+            }}
+          >
+            {loading ? "Claiming..." : "Claim 0.05 MON"}
           </button>
         ) : (
-          <p>⏳ Next claim available in {timer}</p>
+          <p style={{ textAlign: "center" }}>⏳ Next claim in {timer}</p>
         )}
       </div>
 
-      {status && <p className="status">{status}</p>}
-
-      <a
-        href="https://twitter.com/dattips_boy"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="twitter-link"
-      >
-        Created by @dattips_boy
-      </a>
+      {status && <p style={{ textAlign: "center", color: status.startsWith("✅") ? "green" : "red" }}>{status}</p>}
 
       <div
-        style={{
-          marginTop: '30px',
-          padding: '15px',
-          background: 'linear-gradient(90deg, #6a0dad, #00c6ff)',
-          color: 'white',
-          borderRadius: '8px',
-          fontSize: '14px',
-          textAlign: 'center',
-        }}
-      >💡 Built for the Monad Testnet — Have fun testing and happy claiming!
-      </div>
-
-      {/* A-Ads Banner */}
-      <div 
-        id="frame"
-        style={{ 
-          width: "100%", margin: "20px auto 0 auto", 
-          background: "rgba(0, 0, 0, 0.35)",
-          position: "relative", 
-          zIndex: 99998, 
-          textAlign: "center", 
-          padding: "10px 0", 
-          borderRadius: "8px"
+        style={{marginTop: "20px",
+          padding: "15px",
+          background: "linear-gradient(90deg, #6a0dad, #00c6ff)",
+          color: "white",
+          borderRadius: "8px",
+          fontSize: "14px",
+          textAlign: "center",
         }}
       >
-        <iframe
-          data-aa="2406854"
-          src="//acceptable.a-ads.com/2406854/?size=Adaptive"
-          style={{ 
-            border: 0, 
-            padding: 0, 
-            width: "70%", 
-            height: "auto", 
-            overflow: "hidden", 
-            display: "block", 
-            margin: "auto" 
-          }}
-          title="A-Ads"
-        ></iframe>
+        💡 Built for the Monad Testnet — Works on PC & mobile!
       </div>
     </div>
   );
