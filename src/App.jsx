@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { FAUCET_CONTRACT_ADDRESS, FAUCET_ABI } from './config/config.js'; // ✅ fixed import path
 
 function App() {
@@ -7,12 +7,14 @@ function App() {
   const [timer, setTimer] = useState('');
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
-  const intervalRef = useRef(null); // 🔹 to persist interval
 
-  // ✅ Check cooldown from backend via proxy
+  // ✅ Use environment variable for backend URL
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
+
+  // ---------- Check cooldown ----------
   const checkCooldown = async (addr) => {
     try {
-      const res = await fetch(`/api/cooldown`, {
+      const res = await fetch(`${BACKEND_URL}/cooldown`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ address: addr }),
@@ -28,7 +30,7 @@ function App() {
     }
   };
 
-  // ✅ Claim via backend via proxy
+  // ---------- Claim via backend ----------
   const claimFaucet = async () => {
     if (!address) {
       setStatus('❌ Please enter a wallet address.');
@@ -37,7 +39,7 @@ function App() {
 
     setLoading(true);
     try {
-      const res = await fetch(`/api/claim`, {
+      const res = await fetch(`${BACKEND_URL}/claim`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ address }),
@@ -46,8 +48,7 @@ function App() {
       const data = await res.json();
       if (data.success) {
         setStatus(`✅ Claim successful! Tx: ${data.txHash}`);
-        setAddress(''); // 🔹 clear input after successful claim
-        await checkCooldown(address); // refresh cooldown immediately
+        checkCooldown(address); // refresh cooldown
       } else {
         setStatus(`❌ Claim failed: ${data.error}`);
       }
@@ -60,25 +61,20 @@ function App() {
 
   // ⏳ live countdown effect
   useEffect(() => {
-    if (intervalRef.current) clearInterval(intervalRef.current); // clear old interval
     if (cooldown > 0) {
-      intervalRef.current = setInterval(() => {
-        setCooldown(prev => {
+      const interval = setInterval(() => {
+        setCooldown((prev) => {
           if (prev <= 1) {
-            clearInterval(intervalRef.current);
-            intervalRef.current = null;
+            clearInterval(interval);
+            checkCooldown(address); // auto-refresh
             return 0;
           }
           return prev - 1;
         });
       }, 1000);
-    } else {
-      setTimer('');
+      return () => clearInterval(interval);
     }
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, [cooldown]);
+  }, [cooldown, address]);
 
   // format seconds -> HH:MM:SS
   useEffect(() => {
@@ -138,14 +134,14 @@ function App() {
       <div
         style={{
           marginTop: '30px',
-          padding: '15px',background: 'linear-gradient(90deg, #6a0dad, #00c6ff)',
+          padding: '15px',
+          background: 'linear-gradient(90deg, #6a0dad, #00c6ff)',
           color: 'white',
           borderRadius: '8px',
           fontSize: '14px',
           textAlign: 'center',
         }}
-      >
-        💡 Built for the Monad Testnet — Have fun testing and happy claiming!
+      >💡 Built for the Monad Testnet — Have fun testing and happy claiming!
       </div>
 
       {/* A-Ads Banner */}
