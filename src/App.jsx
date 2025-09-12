@@ -8,13 +8,10 @@ function App() {
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // ✅ Use environment variable for backend URL
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
-
-  // ---------- Check cooldown ----------
+  // ✅ Check cooldown from backend via proxy
   const checkCooldown = async (addr) => {
     try {
-      const res = await fetch(`${BACKEND_URL}/cooldown`, {
+      const res = await fetch(`/api/cooldown`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ address: addr }),
@@ -27,10 +24,11 @@ function App() {
       }
     } catch (err) {
       console.error("Cooldown check failed:", err);
+      setStatus('❌ Failed to fetch cooldown');
     }
   };
 
-  // ---------- Claim via backend ----------
+  // ✅ Claim via backend via proxy
   const claimFaucet = async () => {
     if (!address) {
       setStatus('❌ Please enter a wallet address.');
@@ -39,7 +37,7 @@ function App() {
 
     setLoading(true);
     try {
-      const res = await fetch(`${BACKEND_URL}/claim`, {
+      const res = await fetch(`/api/claim`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ address }),
@@ -53,8 +51,10 @@ function App() {
         setStatus(`❌ Claim failed: ${data.error}`);
       }
     } catch (err) {
-      console.error(err);
-      setStatus('❌ Claim failed: ' + err.message);
+      console.error("Claim failed:", err);
+      let msg = "Claim failed: Unknown error";
+      if (err && err.message) msg = "Claim failed: " + err.message;
+      setStatus(msg);
     }
     setLoading(false);
   };
@@ -145,29 +145,29 @@ function App() {
       </div>
 
       {/* A-Ads Banner */}
-      <div
+      <div 
         id="frame"
-        style={{
-          width: "100%", margin: "20px auto 0 auto",
+        style={{ 
+          width: "100%", margin: "20px auto 0 auto", 
           background: "rgba(0, 0, 0, 0.35)",
-          position: "relative",
-          zIndex: 99998,
-          textAlign: "center",
-          padding: "10px 0",
+          position: "relative", 
+          zIndex: 99998, 
+          textAlign: "center", 
+          padding: "10px 0", 
           borderRadius: "8px"
         }}
       >
         <iframe
           data-aa="2406854"
           src="//acceptable.a-ads.com/2406854/?size=Adaptive"
-          style={{
-            border: 0,
-            padding: 0,
-            width: "70%",
-            height: "auto",
-            overflow: "hidden",
-            display: "block",
-            margin: "auto"
+          style={{ 
+            border: 0, 
+            padding: 0, 
+            width: "70%", 
+            height: "auto", 
+            overflow: "hidden", 
+            display: "block", 
+            margin: "auto" 
           }}
           title="A-Ads"
         ></iframe>
