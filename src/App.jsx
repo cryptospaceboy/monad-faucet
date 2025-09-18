@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { FAUCET_CONTRACT_ADDRESS, FAUCET_ABI } from './config/config.js';
 
 function App() {
   const [address, setAddress] = useState('');
@@ -15,7 +14,7 @@ function App() {
   const checkCooldown = async (addr) => {
     if (!addr) return;
     try {
-      const res = await fetch(`${BACKEND_URL}/cooldown`, {
+      const res = await fetch(`${BACKEND_URL}/cooldown`, {   // ✅ fixed template string
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ address: addr }),
@@ -41,18 +40,19 @@ function App() {
 
     setLoading(true);
     try {
-      const res = await fetch(`${BACKEND_URL}/claim`, {
+      const res = await fetch(`${BACKEND_URL}/claim`, {   // ✅ fixed template string
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ address }),
       });
 
       const data = await res.json();
+
       if (data.success) {
         setStatus(`✅ Claim successful! Tx: ${data.txHash}`);
         checkCooldown(address);
       } else {
-        setStatus(`❌ Claim failed: ${data.error}`);
+        setStatus(`❌ Claim failed: ${data.message || data.error}`);
       }
     } catch (err) {
       console.error(err);
@@ -94,89 +94,83 @@ function App() {
     }
   }, [cooldown]);
 
-return (
-  <div className="app-container" style={{ maxWidth: "500px", margin: "auto", padding: "20px" }}>
-    {/* Faucet name + subtitle */}
-    <div style={{ textAlign: "center", marginBottom: "20px" }}>
-      <h1 style={{ fontSize: "28px", margin: 0 }}>
-        MonDROP 💧
-      </h1>
-      <p style={{ fontSize: "16px", color: "#bbb", marginTop: "5px" }}>
-        Claim Monad Faucet
-      </p>
-      {cooldown > 0 && (
-        <p style={{ fontSize: "14px", color: "#aaa" }}>
-          ⏳ You can claim again in {timer}
+  return (
+    <div className="app-container" style={{ maxWidth: "500px", margin: "auto", padding: "20px" }}>
+      <div style={{ textAlign: "center", marginBottom: "20px" }}>
+        <h1 style={{ fontSize: "28px", margin: 0 }}>
+          MonDROP 💧
+        </h1>
+        <p style={{ fontSize: "16px", color: "#bbb", marginTop: "5px" }}>
+          Claim Monad Faucet
         </p>
-      )}
-    </div>
+        {cooldown > 0 && (
+          <p style={{ fontSize: "14px", color: "#aaa" }}>
+            ⏳ You can claim again in {timer}
+          </p>
+        )}
+      </div>
 
-    {/* Input + claim */}
-    <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "20px" }}>
-      <input
-        type="text"
-        value={address}
-        onChange={(e) => setAddress(e.target.value)}
-        placeholder="Enter your wallet address"
-        style={{
-          padding: "12px",
-          borderRadius: "8px",
-          border: "1px solid #ccc",
-          fontSize: "16px",
-          width: "100%",
-        }}
-      />
-
-      {/* Follow + notification (before claim button) */}
-      <p style={{ textAlign: "center", fontSize: "14px", margin: "10px 0" }}>
-        Follow creator <span style={{ color: "#6a0dad", fontWeight: "bold" }}>@dattips_boy</span> <br />
-        Turn on tweet notifications 🔔
-      </p>
-
-      {cooldown === 0 ? (
-        <button
-          onClick={claimFaucet}
-          disabled={loading}
+      <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "20px" }}>
+        <input
+          type="text"
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+          placeholder="Enter your wallet address"
           style={{
             padding: "12px",
             borderRadius: "8px",
-            background: "#6a0dad",
-            color: "white",
+            border: "1px solid #ccc",
             fontSize: "16px",
-            cursor: loading ? "not-allowed" : "pointer",
             width: "100%",
           }}
-        >
-          {loading ? "Claiming..." : "Claim 0.05 MON"}
-        </button>
-      ) : (
-        <p style={{ textAlign: "center" }}>⏳ Next claim in {timer}</p>
+        />
+
+        <p style={{ textAlign: "center", fontSize: "14px", margin: "10px 0" }}>
+          Follow creator <span style={{ color: "#6a0dad", fontWeight: "bold" }}>@dattips_boy</span> <br />
+          Turn on tweet notifications 🔔
+        </p>
+
+        {cooldown === 0 ? (
+          <button
+            onClick={claimFaucet}
+            disabled={loading}
+            style={{padding: "12px",
+              borderRadius: "8px",
+              background: "#6a0dad",
+              color: "white",
+              fontSize: "16px",
+              cursor: loading ? "not-allowed" : "pointer",
+              width: "100%",
+            }}
+          >
+            {loading ? "Claiming..." : "Claim 0.05 MON"}
+          </button>
+        ) : (
+          <p style={{ textAlign: "center" }}>⏳ Next claim in {timer}</p>
+        )}
+      </div>
+
+      {status && (
+        <p style={{ textAlign: "center", color: status.startsWith("✅") ? "green" : "red" }}>
+          {status}
+        </p>
       )}
-    </div>
 
-    {/* Status */}
-    {status && (
-      <p style={{ textAlign: "center", color: status.startsWith("✅") ? "green" : "red" }}>
-        {status}
-      </p>
-    )}
-
-    {/* Footer banner */}
-    <div
-      style={{
-        marginTop: "20px",
-        padding: "15px",
-        background: "linear-gradient(90deg, #6a0dad, #00c6ff)",
-        color: "white",
-        borderRadius: "8px",
-        fontSize: "14px",
-        textAlign: "center",
-      }}
-    >
-      💡 Built for the Monad Testnet — Works on PC & mobile!
+      <div
+        style={{
+          marginTop: "20px",
+          padding: "15px",
+          background: "linear-gradient(90deg, #6a0dad, #00c6ff)",
+          color: "white",
+          borderRadius: "8px",
+          fontSize: "14px",
+          textAlign: "center",
+        }}
+      >
+        💡 Built for the Monad Testnet — Works on PC & mobile!
+      </div>
     </div>
-  </div>
-);
+  );
 }
 
 export default App;
