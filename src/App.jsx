@@ -9,6 +9,18 @@ export default function App() {
           Our app is currently down for maintenance. Thank you for your patience.
         </p>
         <div className="loader"></div>
+        <p className="footer">
+          Follow creator{" "}
+          <a
+            href="https://twitter.com/dattips_boy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="link"
+          >
+            @dattips_boy
+          </a>{" "}
+          for future updates.
+        </p>
       </div>
     </div>
   );
