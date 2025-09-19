@@ -1,20 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 function App() {
-  const [address, setAddress] = useState('');
+  const [address, setAddress] = useState("");
   const [cooldown, setCooldown] = useState(0);
-  const [timer, setTimer] = useState('');
-  const [status, setStatus] = useState('');
+  const [timer, setTimer] = useState("");
+  const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Backend URL from .env
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
-  // Check cooldown from backend
+  // 🔹 Check cooldown
   const checkCooldown = async (addr) => {
     if (!addr) return;
     try {
-      const res = await fetch(`${BACKEND_URL}/cooldown`, {   // ✅ fixed template string
+      const res = await fetch(`${BACKEND_URL}/cooldown`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ address: addr }),
@@ -31,16 +30,16 @@ function App() {
     }
   };
 
-  // Claim faucet
+  // 🔹 Claim faucet
   const claimFaucet = async () => {
     if (!address) {
-      setStatus('❌ Please enter a wallet address.');
+      setStatus("❌ Please enter a wallet address.");
       return;
     }
 
     setLoading(true);
     try {
-      const res = await fetch(`${BACKEND_URL}/claim`, {   // ✅ fixed template string
+      const res = await fetch(`${BACKEND_URL}/claim`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ address }),
@@ -52,16 +51,23 @@ function App() {
         setStatus(`✅ Claim successful! Tx: ${data.txHash}`);
         checkCooldown(address);
       } else {
-        setStatus(`❌ Claim failed: ${data.message || data.error}`);
+        // 🔹 Handle specific backend errors
+        if (data.error?.includes("age")) {
+          setStatus("❌ Wallet must be at least 10 days old.");
+        } else if (data.error?.includes("transactions")) {
+          setStatus("❌ Wallet must have at least 10 transactions.");
+        } else {
+          setStatus(`❌ Claim failed: ${data.message || data.error}`);
+        }
       }
     } catch (err) {
       console.error(err);
-      setStatus('❌ Claim failed: Unknown error');
+      setStatus("❌ Claim failed: Unknown error");
     }
     setLoading(false);
   };
 
-  // Countdown effect
+  // 🔹 Cooldown countdown
   useEffect(() => {
     if (cooldown > 0) {
       const interval = setInterval(() => {
@@ -78,28 +84,26 @@ function App() {
     }
   }, [cooldown, address]);
 
-  // Format seconds -> HH:MM:SS
+  // 🔹 Format time
   useEffect(() => {
     if (cooldown > 0) {
       const hours = Math.floor(cooldown / 3600);
       const minutes = Math.floor((cooldown % 3600) / 60);
       const seconds = cooldown % 60;
       setTimer(
-        `${hours.toString().padStart(2, '0')}:${minutes
+        `${hours.toString().padStart(2, "0")}:${minutes
           .toString()
-          .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+          .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
       );
     } else {
-      setTimer('');
+      setTimer("");
     }
   }, [cooldown]);
 
   return (
     <div className="app-container" style={{ maxWidth: "500px", margin: "auto", padding: "20px" }}>
       <div style={{ textAlign: "center", marginBottom: "20px" }}>
-        <h1 style={{ fontSize: "28px", margin: 0 }}>
-          MonDROP 💧
-        </h1>
+        <h1 style={{ fontSize: "28px", margin: 0 }}>MonDROP 💧</h1>
         <p style={{ fontSize: "16px", color: "#bbb", marginTop: "5px" }}>
           Claim Monad Faucet
         </p>
@@ -126,15 +130,15 @@ function App() {
         />
 
         <p style={{ textAlign: "center", fontSize: "14px", margin: "10px 0" }}>
-          Follow creator <span style={{ color: "#6a0dad", fontWeight: "bold" }}>@dattips_boy</span> <br />
-          Turn on tweet notifications 🔔
+          Follow creator <span style={{ color: "#6a0dad", fontWeight: "bold" }}>@dattips_boy</span> <br />Turn on tweet notifications 🔔
         </p>
 
         {cooldown === 0 ? (
           <button
             onClick={claimFaucet}
             disabled={loading}
-            style={{padding: "12px",
+            style={{
+              padding: "12px",
               borderRadius: "8px",
               background: "#6a0dad",
               color: "white",
